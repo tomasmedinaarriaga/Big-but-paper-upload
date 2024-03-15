@@ -1,0 +1,795 @@
+schemaVersion: 3
+meta:
+  sourceVersionId: 82cced7f-505e-42cb-8532-5e60c7ec999b # DO NOT CHANGE - Hex uses this to match up project versions when reimporting the file
+  description: ""
+  projectId: 6cc50812-76b4-4a52-9b6a-a9e795461529 # DO NOT CHANGE - Unique ID of the project from which this file was generated
+  title: Big butt paper
+  timezone: null
+  appTheme: SYS_PREF
+  codeLanguage: PYTHON
+  status: null
+  categories: []
+  castDecimalsDefault: true
+  logicQueryCacheTimeout: null
+  publishedQueryCacheTimeout: null
+  hexType: PROJECT
+projectAssets:
+  dataConnections: []
+  envVars: []
+  secrets: []
+sharedAssets:
+  secrets: []
+  vcsPackages: []
+  dataConnections: []
+  externalFileIntegrations: []
+cells:
+  - cellType: CODE
+    cellId: aa6b44bf-3a74-4bc9-b285-43d590735270 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: |-
+        import numpy as np
+        import re
+        from pprint import pprint
+        from bs4 import BeautifulSoup
+        import urllib3
+        import time
+        import pandas as pd
+        import re
+  - cellType: CODE
+    cellId: 1f0aea52-d2e6-4a30-920c-4a6dfa8da832 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: |
+        #takes in a link and returns a beautiful soup html object
+        def html_Aquisition(link):
+            http = urllib3.PoolManager()
+            res = http.request('GET', link)
+            return BeautifulSoup(res.data, 'html.parser')
+  - cellType: CODE
+    cellId: 0cb8c323-469f-4000-ae61-e0fdbe749b18 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: |
+        #takes in a html text block, a tag, and for my instance a class
+        def html_parser(html, tag, cls):
+            return html.find_all(tag, class_ = cls)
+  - cellType: CODE
+    cellId: a7c09578-0249-47a1-8a22-391604423169 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: ""
+  - cellType: CODE
+    cellId: 850b4aae-e53a-40fe-95f5-fe06c1a89a96 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: |
+        
+        link = "https://www.zippia.com/advice/largest-toilet-paper-brands/"
+        tag = 'li'
+        cls = 'ordered-list-large-item'
+        html_Aquisition(link)
+        block_list = html_parser(html_Aquisition(link), tag, cls)
+        #looking at the list I created to see where the companies I needed where going to be at 
+        private_label_html = list(block_list[0])
+        angel_soft_html = list(block_list[1])
+        procter_gamble_html = list(block_list[2:4])
+        scott_technolofies_html = list(block_list[4])
+        Quilten_northern = (list(block_list[5]) + list(block_list[7]))
+        Kimberly_clark_corp_html = (list(block_list[6]) + list(block_list[8]) + list(block_list[9]))
+        # key words that I wanted to pluck out of my block lists
+        subs = ["Private Label.", "$" , "Angel" "Charmin Ultra Soft.","Charmin Ultra Strong.", "Quilted Northern Ultra Plush.","Scott Technologies.","Kimberly"]
+        #making a list of lists 
+        companylist = private_label_html + angel_soft_html +procter_gamble_html + scott_technolofies_html + Quilten_northern + Kimberly_clark_corp_html
+  - cellType: CODE
+    cellId: c99cdcb2-8561-42f2-86f9-73e8e773181e # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: ""
+  - cellType: CODE
+    cellId: 53b5a152-e4c8-470f-a690-8989153933a0 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: |
+        #turning all elements into strings
+        string_list = [str(element) for element in companylist]
+  - cellType: CODE
+    cellId: 15debf11-b42f-4a98-abdf-0377648af4c5 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: |-
+        #plucking out only the parts I want based on sub lists
+        res = [i for i in string_list if any(word in i for word in subs)]
+
+        #removes the tags and subsequently links that I found in my strings returning the cleaned code
+        def tag_removal(string_list):
+            for i in range(len(string_list)):
+                string_list[i] = string_list[i].replace("<p>", "")
+                string_list[i] = string_list[i].replace("</p>", " ")
+                string_list[i] = string_list[i].replace("<b>", "")
+                string_list[i] = string_list[i].replace("</b>", "")
+                string_list[i] = string_list[i].replace("\n", "")
+                string_list[i] = string_list[i].replace("</li>", "")
+                string_list[i] = string_list[i].replace("<li>", "")
+                string_list[i] = string_list[i].replace("""<li class="ordered-list-large-item">""", "")
+
+                string_list[i] = string_list[i].replace("""<a href="https://www.zippia.com/mehoopany-pa-jobs/" ltype="auto">""", " ")
+                string_list[i] = string_list[i].replace("""<a href="https://www.zippia.com/pennsylvania-jobs/" ltype="auto">""", "")
+                string_list[i] = string_list[i].replace("""<a href="https://www.zippia.com/p-g-careers-11515/">""", "")
+                string_list[i] = string_list[i].replace("""<a href="https://www.zippia.com/green-bay-wi-jobs/" ltype="auto">""", "")
+                string_list[i] = string_list[i].replace("""<a href="https://www.zippia.com/scott-technologies-careers-37818/jobs/">""", "")
+                string_list[i] = string_list[i].replace("""<a href="https://www.zippia.com/kimberly-clark-careers-6520/locations/">""", "")        
+                string_list[i] = string_list[i].replace("<a>", " ")
+                string_list[i] = string_list[i].replace("</a>", " ")
+                string_list[i] = string_list[i].replace("""<a href="https://www.zippia.com/wisconsin-jobs/" ltype="auto">""", "")
+                string_list[i] = string_list[i].replace("""<a href="https://www.zippia.com/cleaner-jobs/jobs/" ltype="auto">""", "")
+                string_list[i] = string_list[i].replace("""<a href="https://www.zippia.com/marketer-jobs/jobs/" ltype="auto">""", "")
+                string_list[i] = string_list[i].replace("""<a href="https://www.zippia.com/plumber-jobs/jobs/" ltype="auto">""", "")
+                string_list[i] = string_list[i].replace("""<a href="https://www.zippia.com/kimberly-clark-careers-6520/">""", "")
+                string_list[i] = string_list[i].replace("""<a href="https://www.zippia.com/manufacturer-jobs/jobs/" ltype="auto">""", "")
+                string_list[i] = string_list[i].replace("""<a href="https://www.zippia.com/plumber-jobs/jobs/" ltype="auto">""", "")
+                string_list[i] = string_list[i].replace("""<a href="https://www.zippia.com/koch-industries-careers-28828/">""", "")
+
+
+
+            return string_list
+
+        tag_removal(res)
+  - cellType: CODE
+    cellId: 449f157d-2b8b-4e5d-b579-fc9d266e6b1a # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: |+
+        # for me I found that every 2 elements was a brand and a revenue text
+        def company_sorting(company_list):
+            enclosure = 0
+            break_sign = "$"
+            company_profit = []
+            for line in range(len(res)):
+                line = enclosure
+                enclosure = line + 2
+                company_profit.append(res[line:enclosure])
+
+
+            return company_profit
+
+  - cellType: CODE
+    cellId: 7f68b3d7-d5f6-4724-8c19-dd7c9157fe1d # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: |-
+        company_profit = company_sorting(res)
+        #eroneus entries
+        del(company_profit[1][0])
+        del(company_profit[3])
+        del(company_profit[4])
+        del(company_profit[6])
+         
+        comapny_profit_df = pd.DataFrame(company_profit, columns = ['Company', 'Profit',]) 
+  - cellType: TEXT
+    cellId: c0a47ee2-3bfe-433d-b477-894bce112789 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          children:
+            - text: "I will be analyzing the environmental impacts of both toilet paper and bidets. Would switching from toilet paper to bidets lower ones carbon foot print? In order to answer this question I will need to answer a number of smaller questions. Which are, but not limited to: "
+        - type: paragraph
+          children:
+            - text: "How many trees are needed to supply the us with toilet paper? "
+        - type: paragraph
+          children:
+            - text: "How much water is used for a bidet to work? "
+        - type: paragraph
+          children:
+            - text: The cost of toilet paper vs the cost of a bidet,
+        - type: paragraph
+          children:
+            - text: waste generated by toilet paper and its production,
+        - type: paragraph
+          children:
+            - text: "and more. "
+        - type: paragraph
+          children:
+            - text: Lets start with the numbers of toilet paper.
+  - cellType: TEXT
+    cellId: f23b8679-cf86-4872-b14f-ed431f4aa055 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: h1
+          children:
+            - text: Toilet paper Facts
+  - cellType: CODE
+    cellId: 918e6c1b-74ca-4dbe-a5e0-daedd279bb71 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: comapny_profit_df
+  - cellType: TEXT
+    cellId: cad6e297-077e-493e-ab90-3f2bae76acb1 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          children:
+            - text: "The top 5 toiler paper brands all make 1 billion + dollars a year. And of the top 10 brands, they can be consolidated to 3 companies. "
+            - text: Georgia pacific LLC
+              italic: true
+            - text: " which owns "
+            - bold: true
+              text: private label, angel soft, and quilted northern ultra strong
+            - text: ". Two of which make above a billion dollars a year. "
+            - text: Procter Gamble
+              italic: true
+            - text: " which owns "
+            - bold: true
+              text: Charmin ultra soft and strong
+            - text: ", again both making above a billion dollars a year in revenue. "
+            - text: Kimberly clark corporation
+              italic: true
+            - text: " owns "
+            - bold: true
+              text: Scott technologies
+            - text: ", "
+            - bold: true
+              text: Kleenex Cottonelle Clean Care, Kleenex Cottonelle Ultra Comfort Care, Scott Extra Soft.
+            - text: "\n"
+  - cellType: TEXT
+    cellId: cc0594f1-7a56-436e-be4d-a4ba05b44796 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          children:
+            - text: ""
+            - src: /api/v1/file/c0718b6a-ac6f-40d8-8473-a20fbed1ab57
+              type: image
+              width: 600
+              children:
+                - text: ""
+            - text: ""
+  - cellType: TEXT
+    cellId: 30f48bdf-ad66-42a3-baf2-b599433276fc # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          children:
+            - text: "As we can see from this info graphic, 31 million trees are cut down every year to supply the us with toilet paper. A YEAR. To put this into comparison:"
+  - cellType: TEXT
+    cellId: 29372481-ea84-42d8-932b-6fb5f0afa3ab # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          indent: 1
+          children:
+            - text: 'Side node, I was going to compare the the amount of trees used to make pencils, but it seems there is not a really good number to put on this. If you look this up youll see a stat which states that 82k trees are used to make 14 billion pencils a year. Which sounds wildly innacurate and when I went to go look as to where this figure originates from. I found that its from a website called "something wonderful" where someone around 2009 says the above fact and it seems websites have just taken this and ran with it. In an article by '
+            - url: https://www.rediff.com/getahead/report/achievers-meet-indian-superheroes-vishnu-vardhan-divya-shetty-plantcil-eco-friendly-pencils/20180309.htm
+              type: a
+              children:
+                - text: "rediff "
+            - text: where they interview some Vishnu Vardhan and Divya Shetty, co-founders of Indian Superheroes.
+        - type: paragraph
+          indent: 1
+          children:
+            - text: ""
+              italic: true
+        - type: paragraph
+          indent: 1
+          children:
+            - text: "\"\"Over 13 million hectares of forest is lost to deforestation, of which, 36 per cent is for paper manufacturing and 42 per cent for manufacturing timber-based products that constitutes 18-20 billion pencils,\" says Vardhan.These statistics were enough to make Vardhan and Shetty ponder over the use of recycled paper to make pencils. \"We decided to mitigate two evils at once and that's how Plantcil was born,\" says Vardhan. \"\""
+              italic: true
+            - text: "\n"
+        - type: paragraph
+          indent: 1
+          children:
+            - text: |
+                This article also does not site their sources and I cant find where Vishnu or Divya found this figure. 
+  - cellType: TEXT
+    cellId: 65086790-4a68-4377-8295-3dff763be06c # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          children:
+            - text: Even with both the, wildly, conservative estimation of 82k trees or the liberal 8 million trees a year. We are still using almost double that amount of trees. The case becomes even worse when we delve into water usage.
+  - cellType: TEXT
+    cellId: 654578f6-9581-4591-9da9-b65b68bc0de8 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: h3
+          children:
+            - text: --Toilet paper water usage
+  - cellType: TEXT
+    cellId: 253cf5df-c664-46c6-b4fa-a685d38a72ca # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          children:
+            - text: "In an Article by "
+            - url: https://biobidet.com/blogs/news/is-toilet-paper-sustainable-the-toilet-paper-problem
+              type: a
+              children:
+                - text: "bioBidet  "
+            - text: " they state that a single roll of toilet paper can take up to 37 gallons of water to produce. If we do some quick math"
+  - cellType: CODE
+    cellId: 365d290b-169d-4b2e-a6c7-b4eebbda15d0 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: |-
+        #how much toilet paper one tree makes
+        one_tree = 1500
+        #total number of tress consumed by toilet paper production a year
+        total_tress = 31114249
+        #number of gallons used to make 1 toiler paper roll
+        water_used = 37
+        print((one_tree * total_tress)*37)
+  - cellType: TEXT
+    cellId: 788bbc5c-6155-4e7a-86c6-034a93db4a56 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          children:
+            - text: "Okay, I guess not, when trying to run this I was told I was out of memory.  it should say 1726840819500 gallons of water to produce our toilet paper.  Of course this is from a pro bidet website so I found another article from "
+            - url: https://www.scientificamerican.com/article/earth-talks-bidets/
+              type: a
+              children:
+                - text: Scientific America
+            - text: " stating:"
+        - type: paragraph
+          children:
+            - text: ""
+        - type: paragraph
+          children:
+            - text: '"because they eliminate the use of toilet paper. According to his analysis, Americans use 36.5 billion rolls of toilet paper every year, representing the pulping of some 15 million trees. Says Thomas: “This also involves 473,587,500,000 gallons of water to produce the paper and 253,000 tons of chlorine for bleaching."'
+              italic: true
+            - text: "\n"
+        - type: paragraph
+          children:
+            - text: "Doing some reverse engineering:"
+  - cellType: CODE
+    cellId: 3c4f4329-07f9-4b56-9f80-5463ffb7fb74 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: |
+        #how much toilet paper is used by the us according to scientifc america
+        Toilet_paper_usage = 36500000000
+        #how much water is used in this process acording to scientific america
+        Total_water_usage = 47358750000
+        print(Total_water_usage/Toilet_paper_usage)
+  - cellType: TEXT
+    cellId: 96c171d8-33ab-437b-acab-92e0875cd4c4 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          children:
+            - text: We get 1.2 gallons of water used per toilet paper roll. Wildly varied from bio bidet. However, we can still take these two ranges as a conservative and liberal estimate.
+  - cellType: TEXT
+    cellId: bd257a91-8f3c-4b5b-b90f-fcb3f5ad2e10 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: h3
+          children:
+            - text: How much water does a bidet use?
+  - cellType: TEXT
+    cellId: 12c1dc0e-be33-4545-a107-a70444ec0105 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          children:
+            - text: Its a little tricky to pin point.
+        - type: paragraph
+          children:
+            - text: ""
+        - type: paragraph
+          children:
+            - text: "In the same article by bio bidet, they state that a bidet uses 1/8th of a gallon per use. In the "
+            - url: https://biobidet.com/blogs/news/do-bidets-waste-water
+              type: a
+              children:
+                - text: link
+            - text: " which they site this claim, it leads us to another article written by them it says that a bidet uses the same amount of water as you would use when washing your hands.  In a statement released by the "
+            - url: https://www.epa.gov/watersense/bathroom-faucets
+              type: a
+              children:
+                - text: EPA
+            - text: " says that a standard faucet uses 2.2 gallons of water per minute. Taking the 20 second recommended washing time we can get that "
+  - cellType: CODE
+    cellId: e752aa10-bf70-4fcd-825f-3bb2f1faa41d # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: |-
+        # number of gallons used
+        Gallon_used = 2.2
+        # fraction of time it takes to wash hands
+        Time_spent = 1 / 3
+        print(Gallon_used * Time_spent)
+  - cellType: TEXT
+    cellId: e5bc62b0-1fe3-42a1-9c82-3d25fbd123c0 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          children:
+            - text: "Giving us an estimate of 3/4ths of a gallon per usage based off of the epa faucet estimate and also the statement made by bio bidet. "
+        - type: paragraph
+          children:
+            - text: So how much water is this per year?
+        - type: paragraph
+          children:
+            - text: "Well, we will have to do some rough estimations. "
+  - cellType: TEXT
+    cellId: 73613f54-9dee-4c24-95fc-a3dfce9f2763 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          children:
+            - text: "How often do people poop? "
+        - type: paragraph
+          children:
+            - text: "In an article titled "
+            - url: https://pubmed.ncbi.nlm.nih.gov/20205503/
+              type: a
+              children:
+                - text: "Assessment of normal bowel habits in the general adult population: the Popcol study "
+            - text: "they saw that 98% of their participants pooped between 3 times a day to 3 times per week. "
+        - type: paragraph
+          children:
+            - text: If we take this massive generelization for the whole of the united states. So, if we take the population of the united states, being 334,233,854 as of 2022 based on the census.
+        - type: p
+          children:
+            - text: "\n\n"
+  - cellType: CODE
+    cellId: 1d3cd3a3-836c-4a53-81b6-2d0cdac393f4 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: |-
+        Weeks_in_a_year = 52
+        days_in_a_year = 365
+        Population_poops = 334233854 * 3
+
+        low_range = (Population_poops * Weeks_in_a_year)
+        high_range = (Population_poops * days_in_a_year)
+
+        print(low_range, high_range)
+  - cellType: TEXT
+    cellId: d9191b83-fb05-4d56-a467-899e164a8f14 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          children:
+            - text: |
+                On a low range we get that americans poop 52140481224 times a year, and on the high end; 365986070130
+        - type: paragraph
+          children:
+            - text: this would then equate to
+  - cellType: CODE
+    cellId: 21818bc7-b1ed-459a-8e41-4884e0797e05 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: |-
+        water_used = .75
+
+        print((low_range*water_used), (high_range*water_used))
+  - cellType: TEXT
+    cellId: 8ee35dee-c190-4832-8c8f-93a154ed64fc # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          children:
+            - text: (am I doing this wrong? im kind of dumbfounded by the fact that doing this calculation makes my kernal run out of memory??)
+        - type: paragraph
+          children:
+            - text: On the low range we would use 39105360918 gallons of water per year or 274489552597.5 on the high end. No small amount of water to scoff at by any means, but on the high end almost 100 billion gallons less than toilet paper!
+  - cellType: TEXT
+    cellId: e0438370-4423-47ce-b0eb-a44407ebbaef # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: h1
+          children:
+            - text: Conclusion
+  - cellType: TEXT
+    cellId: 9e8e4bdc-f575-436d-8c7d-5f9c6f89dfb4 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          children:
+            - text: There are demonstrable benefits to switching to bidets for the environment. Even the most exacerbated estimates, we are saving billions of gallons of water and millions of millions of trees.  The answer is clear and absolute.
+  - cellType: MARKDOWN
+    cellId: 14defa62-2574-4616-afd1-592fa22a40eb # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: Markdown 28
+    config:
+      source: ""
+  - cellType: CODE
+    cellId: ac965b46-b19e-4697-ba93-62b07e15eb57 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      source: ""
+  - cellType: TEXT
+    cellId: baee3987-fe1d-4a52-b225-2aa705ef7c9d # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: null
+    config:
+      richText:
+        - type: paragraph
+          children:
+            - text: ""
+appLayout:
+  visibleMetadataFields:
+    - NAME
+    - DESCRIPTION
+    - AUTHOR
+    - LAST_EDITED
+    - LAST_RUN
+    - CATEGORIES
+    - STATUS
+    - TABLE_OF_CONTENTS
+  fullWidth: false
+  tabs:
+    - name: Tab 1
+      rows:
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 15debf11-b42f-4a98-abdf-0377648af4c5
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: c0a47ee2-3bfe-433d-b477-894bce112789
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: f23b8679-cf86-4872-b14f-ed431f4aa055
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 918e6c1b-74ca-4dbe-a5e0-daedd279bb71
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: cad6e297-077e-493e-ab90-3f2bae76acb1
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: cc0594f1-7a56-436e-be4d-a4ba05b44796
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 30f48bdf-ad66-42a3-baf2-b599433276fc
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 29372481-ea84-42d8-932b-6fb5f0afa3ab
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 65086790-4a68-4377-8295-3dff763be06c
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 654578f6-9581-4591-9da9-b65b68bc0de8
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 253cf5df-c664-46c6-b4fa-a685d38a72ca
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 788bbc5c-6155-4e7a-86c6-034a93db4a56
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 96c171d8-33ab-437b-acab-92e0875cd4c4
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: bd257a91-8f3c-4b5b-b90f-fcb3f5ad2e10
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 12c1dc0e-be33-4545-a107-a70444ec0105
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: e5bc62b0-1fe3-42a1-9c82-3d25fbd123c0
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 73613f54-9dee-4c24-95fc-a3dfce9f2763
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: d9191b83-fb05-4d56-a467-899e164a8f14
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 8ee35dee-c190-4832-8c8f-93a154ed64fc
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: e0438370-4423-47ce-b0eb-a44407ebbaef
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 9e8e4bdc-f575-436d-8c7d-5f9c6f89dfb4
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 14defa62-2574-4616-afd1-592fa22a40eb
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: baee3987-fe1d-4a52-b225-2aa705ef7c9d
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+sharedFilters: []
